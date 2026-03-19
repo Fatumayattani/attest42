@@ -18,7 +18,7 @@ class Attest42Pipeline:
         tee_result = self.tee.execute(input_data, policy)
 
         attestation = self.attestor.generate_attestation(
-            agent_id="agent-001",
+            agent_id="attest42",
             input_hash=tee_result.input_hash,
             output_hash=tee_result.output_hash,
             policy=policy,
