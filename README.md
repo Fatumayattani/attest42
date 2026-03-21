@@ -1,4 +1,4 @@
-## 🧠 Attest42
+## Attest42
 
 > **Don’t trust AI agents. Verify them.**
 
@@ -7,7 +7,7 @@ It generates **cryptographic attestations** proving that AI computations were ex
 
 ---
 
-## 🚀 Overview
+##  Overview
 
 AI agents are increasingly handling:
 
@@ -25,7 +25,7 @@ But today, there is no way to **prove**:
 
 ---
 
-## 🔥 What Attest42 Does
+##  What Attest42 Does
 
 Attest42 provides:
 
@@ -46,7 +46,7 @@ Attest42 provides:
 
 ---
 
-## 🧩 Core Concept
+## Core Concept
 
 Attest42 introduces a simple but powerful flow:
 
@@ -118,7 +118,7 @@ Each execution produces a structured proof:
 
 ```json
 {
-  "agent_id": "agent-001",
+  "agent_id": "attest42",
   "input_hash": "0xabc...",
   "output_hash": "0xdef...",
   "policy": {
@@ -126,9 +126,8 @@ Each execution produces a structured proof:
     "allowed_actions": ["summarize"]
   },
   "tee_quote": "BASE64_ENCODED_QUOTE",
-  "timestamp": 1710000000,
-  "compliance": true,
-  "signature": "BLS_SIGNATURE"
+  "signature": "HASH_SIGNATURE (prototype)",
+  "compliance": true
 }
 ```
 
@@ -190,6 +189,7 @@ attest42/
 │   │   │   ├── agent.py           # AI agent execution
 │   │   │   ├── tee.py             # TEE interface (mock/dstack)
 │   │   │   ├── attestation.py     # Attestation generator
+│   │   │   ├── pipeline.py        # Attestation generator
 │   │   │   └── receipts.py        # Cryptographic receipts
 │   │   │
 │   │   ├── models/
