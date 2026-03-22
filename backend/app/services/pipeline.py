@@ -1,20 +1,21 @@
 from typing import Dict, Any
 
-from app.services.tee import MockTEE
 from app.services.attestation import AttestationService
+from app.services.tee import TEE
 
 
 class Attest42Pipeline:
     """
-    Orchestrates full execution flow:
-    input → TEE → attestation
+    Orchestrates execution:
+    input → TEE (isolated) → attestation
     """
 
     def __init__(self):
-        self.tee = MockTEE()
+        self.tee = TEE()
         self.attestor = AttestationService()
 
     def run(self, input_data: str, policy: Dict[str, Any]) -> Dict[str, Any]:
+        # 🔥 TEE now handles execution
         tee_result = self.tee.execute(input_data, policy)
 
         attestation = self.attestor.generate_attestation(
