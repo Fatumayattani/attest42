@@ -1,21 +1,10 @@
-import hashlib
+import subprocess
 import json
-import base64
-from typing import Dict
-
-from app.services.agent import SimpleAgent, AgentResponse
+import os
 
 
 class TEEExecutionResult:
-    def __init__(
-        self,
-        output: str,
-        input_hash: str,
-        output_hash: str,
-        quote: str,
-        blocked: bool,
-        reason: str | None,
-    ):
+    def __init__(self, output, input_hash, output_hash, quote, blocked, reason):
         self.output = output
         self.input_hash = input_hash
         self.output_hash = output_hash
@@ -24,41 +13,40 @@ class TEEExecutionResult:
         self.reason = reason
 
 
-class MockTEE:
+class TEE:
     """
-    Deterministic TEE simulation for testing and demo.
+    TEE abstraction using isolated subprocess execution.
     """
 
-    def __init__(self, enclave_id: str = "attest42-enclave"):
-        self.enclave_id = enclave_id
-        self.agent = SimpleAgent()
-
-    def execute(self, input_data: str, policy: Dict) -> TEEExecutionResult:
-        agent_response: AgentResponse = self.agent.run(input_data, policy)
-
-        input_hash = self._hash(input_data)
-        output_hash = self._hash(agent_response.output)
-
-        quote = self._generate_quote(input_hash, output_hash)
-
-        return TEEExecutionResult(
-            output=agent_response.output,
-            input_hash=input_hash,
-            output_hash=output_hash,
-            quote=quote,
-            blocked=agent_response.blocked,
-            reason=agent_response.reason,
-        )
-
-    def _hash(self, data: str) -> str:
-        return hashlib.sha256(data.encode()).hexdigest()
-
-    def _generate_quote(self, input_hash: str, output_hash: str) -> str:
+    def execute(self, input_data: str, policy: dict) -> TEEExecutionResult:
         payload = {
-            "enclave_id": self.enclave_id,
-            "input_hash": input_hash,
-            "output_hash": output_hash,
+            "input": input_data,
+            "policy": policy,
         }
 
-        serialized = json.dumps(payload, sort_keys=True)
-        return base64.b64encode(serialized.encode()).decode()
+        # Absolute path to avoid path issues
+        import pathlib
+
+        project_root = pathlib.Path(__file__).resolve().parents[3]
+        enclave_path = project_root / "tee" / "enclave_simulator.py"
+
+        result = subprocess.run(
+            ["python", str(enclave_path)],
+            input=json.dumps(payload),
+            text=True,
+            capture_output=True,
+        )
+
+        if result.returncode != 0:
+            raise Exception(f"TEE execution failed: {result.stderr}")
+
+        data = json.loads(result.stdout)
+
+        return TEEExecutionResult(
+            output=data["output"],
+            input_hash=data["input_hash"],
+            output_hash=data["output_hash"],
+            quote=data["quote"],
+            blocked=data["blocked"],
+            reason=data["reason"],
+        )

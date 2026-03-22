@@ -1,0 +1,12 @@
+type: task
+
+name: attest42-run
+
+python: "3.11"
+
+resources:
+  cpu: 1
+  memory: 1GB
+
+commands:
+  - python tee/enclave_simulator.py
